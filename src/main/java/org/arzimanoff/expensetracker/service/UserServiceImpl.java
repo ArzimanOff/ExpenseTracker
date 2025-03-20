@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User registerUser(User user) {
         if (userRepository.findByUsername(user.getUsername()) != null) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Пользователь с таким именем уже существует!");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -42,12 +42,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+            throw new UsernameNotFoundException("Пользователь не найден");
         }
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                new ArrayList<>()
-        );
+        return user;
     }
 }

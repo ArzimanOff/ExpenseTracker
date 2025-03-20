@@ -27,4 +27,9 @@ public class CategoryServiceImpl implements CategoryService{
     public List<Category> getCategoriesForUser(User user) {
         return categoryRepository.findByUser(user);
     }
+
+    @Override
+    public Category getCategoryById(Long id) {
+        return categoryRepository.findById(id).orElse(null);
+    }
 }
