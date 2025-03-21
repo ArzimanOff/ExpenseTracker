@@ -41,8 +41,6 @@ public class ExpenseMapper {
         expense.setDate(dto.getDate());
         expense.setDescription(dto.getDescription());
 
-        // Category требует дополнительной логики (например, загрузки из базы),
-        // поэтому здесь оставляем null или добавляем позже через сервис
         return expense;
     }
 }

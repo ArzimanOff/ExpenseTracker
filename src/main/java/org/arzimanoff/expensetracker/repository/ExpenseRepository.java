@@ -19,4 +19,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Modifying
     @Query("DELETE FROM Expense e WHERE e.id = :id AND e.user = :user")
     int deleteByIdAndUser(@Param("id") Long id, @Param("user") User user);
+
+    List<Expense> findByCategoryIdAndUser(Long categoryId, User user);
 }

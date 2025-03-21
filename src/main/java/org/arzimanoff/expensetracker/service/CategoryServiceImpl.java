@@ -60,4 +60,9 @@ public class CategoryServiceImpl implements CategoryService{
                     .body("Ошибка удаления категории.");
         }
     }
+
+    @Override
+    public Optional<Category> findCategoryByIdAndUser(Long id, User user) {
+        return categoryRepository.findByIdAndUser(id, user);
+    }
 }

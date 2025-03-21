@@ -50,4 +50,9 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
     }
 
+    @Override
+    public List<Expense> getExpensesByCategoryAndUser(Long categoryId, User user) {
+        return expenseRepository.findByCategoryIdAndUser(categoryId, user);
+    }
+
 }

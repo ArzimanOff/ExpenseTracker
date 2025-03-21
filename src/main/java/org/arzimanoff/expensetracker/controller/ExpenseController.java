@@ -7,11 +7,14 @@ import org.arzimanoff.expensetracker.model.Expense;
 import org.arzimanoff.expensetracker.model.User;
 import org.arzimanoff.expensetracker.service.CategoryService;
 import org.arzimanoff.expensetracker.service.ExpenseService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -28,19 +31,24 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<ExpenseDTO> addExpense(
+    public ResponseEntity<?> addExpense(
             @RequestBody Expense expense,
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
         expense.setUser(user);
 
-        // Загружаем полный объект Category по id
-        Category category = categoryService.getCategoryById(expense.getCategory().getId());
-        if (category == null) {
-            return ResponseEntity.badRequest().body(null); // Или выбросить исключение
+        if (expense.getCategory() == null || expense.getCategory().getId() == null){
+            return ResponseEntity.badRequest().body(null);
         }
-        expense.setCategory(category);
+
+        Optional<Category> categoryOptional = categoryService.findCategoryByIdAndUser(expense.getCategory().getId(), user);
+        if (categoryOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Такой категории у вас нет!");
+        }
+
+        expense.setCategory(categoryOptional.get());
 
         Expense savedExpense = expenseService.addExpense(expense);
         return ResponseEntity.ok(
@@ -49,15 +57,29 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseDTO>> getExpenses(Authentication authentication) {
+    public ResponseEntity<List<ExpenseDTO>> getExpenses(
+            Authentication authentication,
+            @RequestParam(value = "categoryId", required = false) Long categoryId
+    ) {
         User user = (User) authentication.getPrincipal();
-        List<Expense> expenses = expenseService.getExpensesForUser(user);
+        List<Expense> expenses;
+        if (categoryId != null){
+            if (categoryService.getCategoryById(categoryId) == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Collections.emptyList());
+            }
+            expenses = expenseService.getExpensesByCategoryAndUser(categoryId, user);
+        } else {
+            expenses = expenseService.getExpensesForUser(user);
+        }
+
         List<ExpenseDTO> expenseDTOs = expenses.stream()
                 .map(expenseMapper::toDTO)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(expenseDTOs);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteExpense(

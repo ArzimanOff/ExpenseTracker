@@ -10,4 +10,5 @@ public interface ExpenseService {
     Expense addExpense(Expense expense);
     List<Expense> getExpensesForUser(User user);
     ResponseEntity<String> deleteExpenseById(Long id, User user);
+    List<Expense> getExpensesByCategoryAndUser(Long categoryId, User user);
 }
