@@ -2,6 +2,8 @@ package org.arzimanoff.expensetracker.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -15,6 +17,8 @@ public class Category {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    private List<Expense> expenses;
 
     // Геттеры и сеттеры
     public Long getId() {
@@ -39,5 +43,13 @@ public class Category {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<Expense> getExpenses() {
+        return expenses;
+    }
+
+    public void setExpenses(List<Expense> expenses) {
+        this.expenses = expenses;
     }
 }

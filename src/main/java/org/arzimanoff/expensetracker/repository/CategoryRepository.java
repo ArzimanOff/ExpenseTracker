@@ -16,17 +16,15 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Transactional
     List<Category> findByUser(User user);
 
-    @Transactional
     Optional<Category> findByIdAndUser(Long id, User user);
+
 
     @Transactional
     @Modifying
     @Query("DELETE FROM Category c WHERE c.id = :id AND c.user = :user")
-    void deleteByIdAndUser(
+    int deleteByIdAndUser(
             @Param("id") Long id,
             @Param("user") User user
     );
-
-
 
 }

@@ -10,5 +10,5 @@ public interface CategoryService {
     Category addCategory(Category category);
     List<Category> getCategoriesForUser(User user);
     Category getCategoryById(Long id);
-    ResponseEntity<?> deleteCategoryById(Long id, User user);
+    ResponseEntity<String> deleteCategoryById(Long id, User user);
 }

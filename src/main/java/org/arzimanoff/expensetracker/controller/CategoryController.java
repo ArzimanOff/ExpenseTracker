@@ -37,7 +37,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategory(Authentication authentication, @PathVariable Long id){
+    public ResponseEntity<String> deleteCategory(Authentication authentication, @PathVariable Long id) {
         User user = (User) authentication.getPrincipal();
         return categoryService.deleteCategoryById(id, user);
     }

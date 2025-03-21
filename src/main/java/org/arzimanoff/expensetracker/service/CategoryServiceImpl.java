@@ -1,5 +1,6 @@
 package org.arzimanoff.expensetracker.service;
 
+import jakarta.transaction.Transactional;
 import org.arzimanoff.expensetracker.model.Category;
 import org.arzimanoff.expensetracker.model.User;
 import org.arzimanoff.expensetracker.repository.CategoryRepository;
@@ -36,16 +37,27 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     @Override
-    public ResponseEntity<?> deleteCategoryById(Long id, User user) {
+    public ResponseEntity<String> deleteCategoryById(Long id, User user) {
         Optional<Category> categoryOptional = categoryRepository.findByIdAndUser(id, user);
-        if (categoryOptional.isPresent()) {
-            Category category = categoryOptional.get();
-            categoryRepository.deleteByIdAndUser(id, user);
-            return ResponseEntity.ok(category);
+        if (categoryOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Категория трат не найдена или у вас нет прав для её удаления.");
+        }
+
+        Category category = categoryOptional.get();
+        if (!category.getExpenses().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Нельзя удалить категорию, если есть траты, относящиеся к этой категории");
+        }
+
+        int deletedRows = categoryRepository.deleteByIdAndUser(id, user);
+        if (deletedRows > 0) {
+            return ResponseEntity.ok("Категория трат успешно удалена");
         } else {
-            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-                    .body("Такой категории не существует или у вас нет прав для её удаления!");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка удаления категории.");
         }
     }
 }
