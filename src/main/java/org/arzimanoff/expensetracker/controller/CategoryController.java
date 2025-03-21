@@ -35,4 +35,10 @@ public class CategoryController {
         List<Category> categories = categoryService.getCategoriesForUser(user);
         return ResponseEntity.ok(categories);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(Authentication authentication, @PathVariable Long id){
+        User user = (User) authentication.getPrincipal();
+        return categoryService.deleteCategoryById(id, user);
+    }
 }

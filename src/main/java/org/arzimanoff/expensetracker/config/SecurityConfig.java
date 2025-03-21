@@ -24,10 +24,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) ->
-                        requests
-                                .requestMatchers("/api/register").permitAll() // Разрешаем регистрацию без аутентификации
-                                .anyRequest().authenticated() // Все остальные запросы требуют аутентификации
+                .authorizeHttpRequests(
+                        (requests) ->
+                                requests
+                                        .requestMatchers("/api/register").permitAll() // Разрешаем регистрацию без аутентификации
+                                        .anyRequest().authenticated() // Все остальные запросы требуют аутентификации
                 )
                 .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable) // для тестов CSRF отключен
