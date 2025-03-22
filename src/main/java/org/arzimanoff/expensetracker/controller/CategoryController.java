@@ -8,6 +8,7 @@ import org.arzimanoff.expensetracker.model.User;
 import org.arzimanoff.expensetracker.service.CategoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,5 +50,19 @@ public class CategoryController {
     public ResponseEntity<String> deleteCategory(Authentication authentication, @PathVariable Long id) {
         User user = (User) authentication.getPrincipal();
         return categoryService.deleteCategoryById(id, user);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDTO> updateCategory(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody Category newCategory
+    ){
+        User user = (User) authentication.getPrincipal();
+        ResponseEntity<Category> response = categoryService.updateCategory(id, newCategory, user);
+        if (!response.getStatusCode().is2xxSuccessful()){
+            return ResponseEntity.status(response.getStatusCode()).body(null);
+        }
+        return ResponseEntity.ok(categoryMapper.toDTO(response.getBody()));
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CategoryServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
@@ -64,5 +64,24 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public Optional<Category> findCategoryByIdAndUser(Long id, User user) {
         return categoryRepository.findByIdAndUser(id, user);
+    }
+
+    @Override
+    public ResponseEntity<Category> updateCategory(
+            Long id,
+            Category updatedCategory,
+            User user
+    ) {
+        Optional<Category> optionalCategory = categoryRepository.findByIdAndUser(id, user);
+        if (optionalCategory.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Category thisCategory = optionalCategory.get();
+        thisCategory.setName(updatedCategory.getName());
+
+        Category savedCategory = categoryRepository.save(thisCategory);
+
+        return ResponseEntity.ok(savedCategory);
     }
 }

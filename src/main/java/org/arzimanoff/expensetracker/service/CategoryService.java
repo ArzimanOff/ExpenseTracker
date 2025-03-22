@@ -13,4 +13,5 @@ public interface CategoryService {
     Category getCategoryById(Long id);
     ResponseEntity<String> deleteCategoryById(Long id, User user);
     Optional<Category> findCategoryByIdAndUser(Long id, User user);
+    ResponseEntity<Category> updateCategory(Long id, Category updatedCategory, User user);
 }
