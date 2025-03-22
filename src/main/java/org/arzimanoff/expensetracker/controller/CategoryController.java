@@ -1,5 +1,8 @@
 package org.arzimanoff.expensetracker.controller;
 
+import org.arzimanoff.expensetracker.dto.CategoryDTO;
+import org.arzimanoff.expensetracker.dto.ExpenseDTO;
+import org.arzimanoff.expensetracker.mapper.CategoryMapper;
 import org.arzimanoff.expensetracker.model.Category;
 import org.arzimanoff.expensetracker.model.User;
 import org.arzimanoff.expensetracker.service.CategoryService;
@@ -8,14 +11,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/categories")
 public class CategoryController {
     private final CategoryService categoryService;
+    private final CategoryMapper categoryMapper;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, CategoryMapper categoryMapper) {
         this.categoryService = categoryService;
+        this.categoryMapper = categoryMapper;
     }
 
     @PostMapping
@@ -30,10 +36,13 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getCategories(Authentication authentication) {
+    public ResponseEntity<List<CategoryDTO>> getCategories(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         List<Category> categories = categoryService.getCategoriesForUser(user);
-        return ResponseEntity.ok(categories);
+        List<CategoryDTO> categoryDTOs = categories.stream()
+                .map(categoryMapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(categoryDTOs);
     }
 
     @DeleteMapping("/{id}")
