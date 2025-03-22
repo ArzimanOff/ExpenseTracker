@@ -13,6 +13,8 @@ public class Expense {
     private Long id;
 
     private BigDecimal amount;
+
+    @Column(name = "date")
     private LocalDate date;
     private String description;
 

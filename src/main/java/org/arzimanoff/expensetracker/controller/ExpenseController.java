@@ -7,11 +7,13 @@ import org.arzimanoff.expensetracker.model.Expense;
 import org.arzimanoff.expensetracker.model.User;
 import org.arzimanoff.expensetracker.service.CategoryService;
 import org.arzimanoff.expensetracker.service.ExpenseService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -59,20 +61,22 @@ public class ExpenseController {
     @GetMapping
     public ResponseEntity<List<ExpenseDTO>> getExpenses(
             Authentication authentication,
-            @RequestParam(value = "categoryId", required = false) Long categoryId
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         User user = (User) authentication.getPrincipal();
-        List<Expense> expenses;
-        if (categoryId != null) {
-            if (categoryService.getCategoryById(categoryId) == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Collections.emptyList());
-            }
-            expenses = expenseService.getExpensesByCategoryAndUser(categoryId, user);
-        } else {
-            expenses = expenseService.getExpensesForUser(user);
+
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
         }
 
+        List<Expense> expenses = expenseService.getExpensesWithFilters(
+                user,
+                categoryId,
+                startDate,
+                endDate
+        );
         List<ExpenseDTO> expenseDTOs = expenses.stream()
                 .map(expenseMapper::toDTO)
                 .collect(Collectors.toList());

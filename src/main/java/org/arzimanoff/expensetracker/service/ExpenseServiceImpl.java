@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             User user
     ) {
         Optional<Expense> existingExpenseOptional = expenseRepository.findByIdAndUser(id, user);
-        if (existingExpenseOptional.isEmpty()){
+        if (existingExpenseOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
@@ -88,6 +89,27 @@ public class ExpenseServiceImpl implements ExpenseService {
         Expense savedExpense = expenseRepository.save(currentExpense);
 
         return ResponseEntity.ok(savedExpense);
+    }
+
+    @Override
+    public List<Expense> getExpensesWithFilters(
+            User user,
+            Long categoryId,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+        if (categoryId != null && startDate != null) {
+            return expenseRepository.findByUserAndCategoryIdAndDateBetween(user, categoryId, startDate, endDate);
+        } else if (categoryId != null) {
+            return expenseRepository.findByUserAndCategoryId(user, categoryId);
+        } else if (startDate != null) {
+            return expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+        } else {
+            return expenseRepository.findByUser(user);
+        }
     }
 
 }
