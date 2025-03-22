@@ -38,7 +38,7 @@ public class ExpenseController {
         User user = (User) authentication.getPrincipal();
         expense.setUser(user);
 
-        if (expense.getCategory() == null || expense.getCategory().getId() == null){
+        if (expense.getCategory() == null || expense.getCategory().getId() == null) {
             return ResponseEntity.badRequest().body(null);
         }
 
@@ -63,7 +63,7 @@ public class ExpenseController {
     ) {
         User user = (User) authentication.getPrincipal();
         List<Expense> expenses;
-        if (categoryId != null){
+        if (categoryId != null) {
             if (categoryService.getCategoryById(categoryId) == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Collections.emptyList());
@@ -80,13 +80,28 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseDTOs);
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteExpense(
             Authentication authentication,
             @PathVariable Long id
-            ){
+    ) {
         User user = (User) authentication.getPrincipal();
         return expenseService.deleteExpenseById(id, user);
     }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ExpenseDTO> updateExpense(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody Expense newExpense
+    ) {
+        User user = (User) authentication.getPrincipal();
+        ResponseEntity<Expense> response = expenseService.updateExpense(id, newExpense, user);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.status(response.getStatusCode()).body(null);
+        }
+        return ResponseEntity.ok(expenseMapper.toDTO(response.getBody()));
+    }
+
 }

@@ -1,8 +1,10 @@
 package org.arzimanoff.expensetracker.service;
 
 import jakarta.transaction.Transactional;
+import org.arzimanoff.expensetracker.model.Category;
 import org.arzimanoff.expensetracker.model.Expense;
 import org.arzimanoff.expensetracker.model.User;
+import org.arzimanoff.expensetracker.repository.CategoryRepository;
 import org.arzimanoff.expensetracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +18,11 @@ import java.util.Optional;
 public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    public ExpenseServiceImpl(ExpenseRepository expenseRepository) {
+    public ExpenseServiceImpl(ExpenseRepository expenseRepository, CategoryRepository categoryRepository) {
         this.expenseRepository = expenseRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -53,6 +56,38 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public List<Expense> getExpensesByCategoryAndUser(Long categoryId, User user) {
         return expenseRepository.findByCategoryIdAndUser(categoryId, user);
+    }
+
+    @Transactional
+    @Override
+    public ResponseEntity<Expense> updateExpense(
+            Long id,
+            Expense updatedExpense,
+            User user
+    ) {
+        Optional<Expense> existingExpenseOptional = expenseRepository.findByIdAndUser(id, user);
+        if (existingExpenseOptional.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Expense currentExpense = existingExpenseOptional.get();
+
+        if (updatedExpense.getCategory() != null && updatedExpense.getCategory().getId() != null) {
+            Optional<Category> categoryOptional = categoryRepository.findByIdAndUser(updatedExpense.getCategory().getId(), user);
+            if (categoryOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            currentExpense.setCategory(categoryOptional.get());
+        }
+
+        // Обновление полей
+        currentExpense.setAmount(updatedExpense.getAmount());
+        currentExpense.setDate(updatedExpense.getDate());
+        currentExpense.setDescription(updatedExpense.getDescription());
+
+        Expense savedExpense = expenseRepository.save(currentExpense);
+
+        return ResponseEntity.ok(savedExpense);
     }
 
 }
