@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +64,8 @@ public class ExpenseController {
             Authentication authentication,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "sortByCost", required = false) String sortByCost
     ) {
         User user = (User) authentication.getPrincipal();
 
@@ -75,7 +77,8 @@ public class ExpenseController {
                 user,
                 categoryId,
                 startDate,
-                endDate
+                endDate,
+                sortByCost
         );
         List<ExpenseDTO> expenseDTOs = expenses.stream()
                 .map(expenseMapper::toDTO)
@@ -106,6 +109,16 @@ public class ExpenseController {
             return ResponseEntity.status(response.getStatusCode()).body(null);
         }
         return ResponseEntity.ok(expenseMapper.toDTO(response.getBody()));
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<BigDecimal> getTotalExpenses(
+            Authentication authentication,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        User user = (User) authentication.getPrincipal();
+        BigDecimal total = expenseService.getTotalExpensesByDateRange(user, startDate, endDate);
+        return ResponseEntity.ok(total);
     }
 
 }

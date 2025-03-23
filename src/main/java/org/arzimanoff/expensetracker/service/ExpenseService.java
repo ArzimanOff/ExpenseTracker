@@ -4,6 +4,7 @@ import org.arzimanoff.expensetracker.model.Expense;
 import org.arzimanoff.expensetracker.model.User;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface ExpenseService {
             User user,
             Long categoryId,
             LocalDate startDate,
-            LocalDate endDate
+            LocalDate endDate,
+            String sortDirection
     );
+
+    BigDecimal getTotalExpensesByDateRange(User user, LocalDate startDate, LocalDate endDate);
 }
