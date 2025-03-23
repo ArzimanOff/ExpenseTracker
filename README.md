@@ -116,5 +116,21 @@
       <hr>
 
 
+## Установка
+### Клонируйте репозиторий:
+```bash
+git clone https://github.com/yourusername/ExpenseTracker.git
+```
+### Настройте базу данных в файле application.properties:
 
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/expensetracker
+spring.datasource.username=yourusername
+spring.datasource.password=yourpassword
+spring.jpa.hibernate.ddl-auto=update
+```
 
+### Запустите приложение:
+```bash
+mvn spring-boot:run
+```
