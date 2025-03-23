@@ -101,26 +101,36 @@ public class ExpenseServiceImpl implements ExpenseService {
             Long categoryId,
             LocalDate startDate,
             LocalDate endDate,
-            String sortDirection
+            String sortCostDirection,
+            String sortDateDirection
     ) {
-        Sort sort = Sort.unsorted();
-        if ("asc".equalsIgnoreCase(sortDirection)) {
-            sort = Sort.by(Sort.Direction.ASC, "amount");
-        } else if ("desc".equalsIgnoreCase(sortDirection)) {
-            sort = Sort.by(Sort.Direction.DESC, "amount");
+        Sort amountSort = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sortCostDirection)) {
+            amountSort = Sort.by(Sort.Direction.ASC, "amount");
+        } else if ("desc".equalsIgnoreCase(sortCostDirection)) {
+            amountSort = Sort.by(Sort.Direction.DESC, "amount");
         }
+        Sort dateSort = Sort.unsorted();
+        if ("asc".equalsIgnoreCase(sortDateDirection)) {
+            dateSort = Sort.by(Sort.Direction.ASC, "date");
+        } else if ("desc".equalsIgnoreCase(sortDateDirection)) {
+            dateSort = Sort.by(Sort.Direction.DESC, "date");
+        }
+
+        Sort combinedSort = dateSort.and(amountSort);
+
 
         if (endDate == null) {
             endDate = LocalDate.now();
         }
         if (categoryId != null && startDate != null) {
-            return expenseRepository.findByUserAndCategoryIdAndDateBetween(user, categoryId, startDate, endDate, sort);
+            return expenseRepository.findByUserAndCategoryIdAndDateBetween(user, categoryId, startDate, endDate, combinedSort);
         } else if (categoryId != null) {
-            return expenseRepository.findByUserAndCategoryId(user, categoryId, sort);
+            return expenseRepository.findByUserAndCategoryId(user, categoryId, combinedSort);
         } else if (startDate != null) {
-            return expenseRepository.findByUserAndDateBetween(user, startDate, endDate, sort);
+            return expenseRepository.findByUserAndDateBetween(user, startDate, endDate, combinedSort);
         } else {
-            return expenseRepository.findByUser(user, sort);
+            return expenseRepository.findByUser(user, combinedSort);
         }
     }
 

@@ -65,7 +65,8 @@ public class ExpenseController {
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(value = "sortByCost", required = false) String sortByCost
+            @RequestParam(value = "sortByCost", required = false) String sortByCost,
+            @RequestParam(value = "sortByDate", required = false) String sortByDate
     ) {
         User user = (User) authentication.getPrincipal();
 
@@ -78,7 +79,8 @@ public class ExpenseController {
                 categoryId,
                 startDate,
                 endDate,
-                sortByCost
+                sortByCost,
+                sortByDate
         );
         List<ExpenseDTO> expenseDTOs = expenses.stream()
                 .map(expenseMapper::toDTO)

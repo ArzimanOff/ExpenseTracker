@@ -19,7 +19,8 @@ public interface ExpenseService {
             Long categoryId,
             LocalDate startDate,
             LocalDate endDate,
-            String sortDirection
+            String sortCostDirection,
+            String sortDateDirection
     );
 
     BigDecimal getTotalExpensesByDateRange(User user, LocalDate startDate, LocalDate endDate);
